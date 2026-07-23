@@ -156,7 +156,14 @@ function Home() {
             {WORK.map((w, i) => (
               <Reveal key={w.title} delay={i * 100}>
                 {w.to ? (
-                  <Link to={w.to} className="group block">
+                  <a
+                    href="/restaurant-project"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.hash = "/restaurant-project";
+                    }}
+                    className="group block"
+                  >
                     <div
                       className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
                       style={{ background: w.tone }}
@@ -179,7 +186,7 @@ function Home() {
                       </div>
                     </div>
                     <p className="mt-4 text-sm text-muted-foreground">{w.tag}</p>
-                  </Link>
+                  </a>
                 ) : (
                   <div className="group">
                     <div
