@@ -37,11 +37,11 @@ const WORK: Array<{
   previewUrl?: string;
 }> = [
   {
-    title: "내 식당 웹사이트", // TODO: replace with your real restaurant project name later
-    tag: "임시 식당 소개 · 메뉴 · 예약", // TODO: replace with your real restaurant project description later
+    title: "내 식당 웹사이트",
+    tag: "임시 식당 소개 · 메뉴 · 예약",
     year: "2025",
     tone: "oklch(0.58 0.08 260)",
-    to: "/booking/restaurant?view=project", // TODO: replace with your real detail route later
+    to: "/restaurant-project",
     previewUrl: "https://perthwithcoffee.lovable.app/",
   },
   { title: "안온 다이닝", tag: "한남 · 와인 다이닝", year: "2025", tone: "oklch(0.62 0.14 38)" },
