@@ -1,149 +1,72 @@
-@font-face {
-  font-family: 'GmarketSansMedium';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
+:root {
+  --radius: 0.875rem;
+  --background: #f6f3eb;
+  --cream: #f6f3eb;
+  --foreground: #171717;
+  --ink: #171717;
+  --card: #fffdf8;
+  --card-foreground: #171717;
+  --popover: #fffdf8;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #f6f3eb;
+  --secondary: #efe8dc;
+  --secondary-foreground: #171717;
+  --muted: #efe8dc;
+  --muted-foreground: #5f5b50;
+  --accent: #b6712d;
+  --accent-foreground: #fffdf8;
+  --destructive: #b24a2c;
+  --destructive-foreground: #fffdf8;
+  --border: #e7ded0;
+  --input: #e7ded0;
+  --ring: #b6712d;
+  --weekend: #b24a2c;
 }
 
 * {
-  font-family: 'GmarketSansMedium', sans-serif !important;
-}
-@import "tailwindcss" source(none);
-@source "../src";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-weekend: var(--weekend);
-  --color-ink: var(--ink);
-  --color-cream: var(--cream);
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
-  --font-serif: "Instrument Serif", "Times New Roman", Georgia, serif;
+  box-sizing: border-box;
 }
 
-:root {
-  --radius: 0.875rem;
-  /* Warm cream / off-white palette */
-  --background: oklch(0.975 0.012 85);     /* cream */
-  --cream: oklch(0.975 0.012 85);
-  --foreground: oklch(0.18 0.01 60);       /* ink */
-  --ink: oklch(0.18 0.01 60);
-  --card: oklch(0.99 0.008 85);
-  --card-foreground: oklch(0.18 0.01 60);
-  --popover: oklch(0.99 0.008 85);
-  --popover-foreground: oklch(0.18 0.01 60);
-  --primary: oklch(0.18 0.01 60);          /* near-black ink */
-  --primary-foreground: oklch(0.975 0.012 85);
-  --secondary: oklch(0.94 0.015 80);
-  --secondary-foreground: oklch(0.18 0.01 60);
-  --muted: oklch(0.94 0.015 80);
-  --muted-foreground: oklch(0.45 0.015 65);
-  --accent: oklch(0.62 0.14 38);           /* terracotta accent */
-  --accent-foreground: oklch(0.99 0.008 85);
-  --destructive: oklch(0.55 0.22 28);
-  --destructive-foreground: oklch(0.99 0.008 85);
-  --border: oklch(0.88 0.018 75);
-  --input: oklch(0.88 0.018 75);
-  --ring: oklch(0.62 0.14 38);
-  --weekend: oklch(0.55 0.22 28);
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.dark {
-  --background: oklch(0.14 0.01 60);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.18 0.012 60);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.18 0.012 60);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.97 0 0);
-  --primary-foreground: oklch(0.14 0.01 60);
-  --secondary: oklch(0.22 0.015 60);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.22 0.015 60);
-  --muted-foreground: oklch(0.68 0.015 60);
-  --accent: oklch(0.72 0.15 38);
-  --accent-foreground: oklch(0.14 0.01 60);
-  --destructive: oklch(0.65 0.2 28);
-  --destructive-foreground: oklch(0.97 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.72 0.15 38);
-  --weekend: oklch(0.7 0.18 28);
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+  letter-spacing: -0.011em;
 }
 
-@layer base {
-  * { border-color: var(--color-border); }
-  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
-    letter-spacing: -0.011em;
-  }
-  h1, h2, h3, h4 { font-family: var(--font-serif); letter-spacing: -0.02em; font-weight: 400; }
-  ::selection { background: var(--color-accent); color: var(--color-accent-foreground); }
+h1, h2, h3, h4 {
+  font-family: "Instrument Serif", "Times New Roman", Georgia, serif;
+  letter-spacing: -0.02em;
+  font-weight: 400;
 }
 
-@utility font-serif {
-  font-family: var(--font-serif);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-@utility card-lift {
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 24px 48px -20px oklch(0.18 0.01 60 / 0.18);
-  }
+img {
+  max-width: 100%;
+  display: block;
 }
 
-@utility reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  &.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+button, input, select, textarea {
+  font: inherit;
 }
 
-@utility grain {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.04;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
+
 @font-face {
   font-family: 'GmarketSansMedium';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
