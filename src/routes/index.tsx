@@ -190,23 +190,13 @@ function Home() {
                     className="group block w-full cursor-pointer text-left"
                   >
                     <div
-                      className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
+                      className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden flex flex-col justify-between p-6 sm:p-8"
                       style={{ background: w.tone }}
                     >
-                      {w.previewUrl ? (
-                        <iframe
-                          src={w.previewUrl}
-                          title={w.title}
-                          loading="lazy"
-                          scrolling="no"
-                          className="absolute inset-0 h-full w-full border-0 z-0 pointer-events-none overflow-hidden"
-                        />
-                      ) : null}
-                      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-black/70" />
-                      <div className="absolute top-5 right-5 z-10 text-[10px] tracking-[0.2em] uppercase text-white/80">
+                      <div className="text-[10px] tracking-[0.2em] uppercase text-white/80 text-right">
                         {w.year}
                       </div>
-                      <div className="absolute bottom-5 left-5 right-5 z-10 text-white">
+                      <div className="text-white">
                         <p className="font-serif text-3xl sm:text-4xl">{w.title}</p>
                       </div>
                     </div>
@@ -215,23 +205,13 @@ function Home() {
                 ) : (
                   <div className="group">
                     <div
-                      className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
+                      className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden flex flex-col justify-between p-6 sm:p-8"
                       style={{ background: w.tone }}
                     >
-                      {w.previewUrl ? (
-                        <iframe
-                          src={w.previewUrl}
-                          title={w.title}
-                          loading="lazy"
-                          scrolling="no"
-                          className="absolute inset-0 h-full w-full border-0 z-0 pointer-events-none overflow-hidden"
-                        />
-                      ) : null}
-                      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-black/70" />
-                      <div className="absolute top-5 right-5 z-10 text-[10px] tracking-[0.2em] uppercase text-white/80">
+                      <div className="text-[10px] tracking-[0.2em] uppercase text-white/80 text-right">
                         {w.year}
                       </div>
-                      <div className="absolute bottom-5 left-5 right-5 z-10 text-white">
+                      <div className="text-white">
                         <p className="font-serif text-3xl sm:text-4xl">{w.title}</p>
                       </div>
                     </div>
