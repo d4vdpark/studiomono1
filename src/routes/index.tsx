@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowUpRight, Check } from "lucide-react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { ArrowUpRight, Check, X } from "lucide-react";
 import { Nav, MobileBottomBar } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ const WORK: Array<{
   tag: string;
   year: string;
   tone: string;
-  to?: string;
   previewUrl?: string;
 }> = [
   {
@@ -41,7 +40,6 @@ const WORK: Array<{
     tag: "임시 식당 소개 · 메뉴 · 예약",
     year: "2025",
     tone: "oklch(0.58 0.08 260)",
-    to: "/restaurant-project",
     previewUrl: "https://perthwithcoffee.lovable.app/",
   },
   { title: "안온 다이닝", tag: "한남 · 와인 다이닝", year: "2025", tone: "oklch(0.62 0.14 38)" },
@@ -50,7 +48,37 @@ const WORK: Array<{
   { title: "온스 베이커리", tag: "연남 · 카페", year: "2024", tone: "oklch(0.5 0.12 60)" },
 ];
 
+const RESTAURANT_PREVIEW_URL = "https://perthwithcoffee.lovable.app";
+
 function Home() {
+  const featuredWork = useMemo(() => WORK.find((item) => item.title === "내 식당 웹사이트"), []);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const handleRestaurantPreviewClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsPreviewOpen(true);
+  };
+
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsPreviewOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isPreviewOpen]);
+
   return (
     <div className="min-h-screen grain pb-24 md:pb-0">
       <Nav />
@@ -155,29 +183,36 @@ function Home() {
           <div className="mt-12 sm:mt-20 grid sm:grid-cols-2 gap-5 sm:gap-8">
             {WORK.map((w, i) => (
               <Reveal key={w.title} delay={i * 100}>
-                {w.to ? (
+                {w.title === "내 식당 웹사이트" ? (
                   <a
-                    href="/restaurant-project"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.location.hash = "/restaurant-project";
-                    }}
-                    className="group block"
+                    href={featuredWork?.previewUrl ?? RESTAURANT_PREVIEW_URL}
+                    onClick={handleRestaurantPreviewClick}
+                    className="group block w-full cursor-pointer text-left"
                   >
                     <div
                       className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
                       style={{ background: w.tone }}
                     >
-                      {w.previewUrl ? (
-                        <iframe
-                          src={w.previewUrl}
-                          title={w.title}
-                          loading="lazy"
-                          scrolling="no"
-                          className="absolute inset-0 h-full w-full border-0 z-0 pointer-events-none overflow-hidden"
-                        />
-                      ) : null}
                       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-black/70" />
+                      <div className="absolute inset-0 z-[0] flex items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.28),_transparent_45%)]">
+                        <div className="w-[82%] rounded-[2rem] border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
+                          <div className="rounded-[1.5rem] border border-white/20 bg-background/90 p-4 text-left shadow-2xl">
+                            <div className="flex items-center gap-2">
+                              <span className="size-2.5 rounded-full bg-foreground/70" />
+                              <span className="size-2.5 rounded-full bg-foreground/40" />
+                              <span className="size-2.5 rounded-full bg-foreground/20" />
+                            </div>
+                            <div className="mt-4 space-y-3">
+                              <div className="h-3 w-3/4 rounded-full bg-foreground/70" />
+                              <div className="h-3 w-1/2 rounded-full bg-foreground/40" />
+                              <div className="grid grid-cols-2 gap-3 pt-3">
+                                <div className="h-20 rounded-2xl bg-foreground/[0.06]" />
+                                <div className="h-20 rounded-2xl bg-foreground/[0.06]" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div className="absolute top-5 right-5 z-10 text-[10px] tracking-[0.2em] uppercase text-white/80">
                         {w.year}
                       </div>
@@ -258,6 +293,46 @@ function Home() {
       </footer>
 
       <MobileBottomBar />
+
+      {isPreviewOpen ? (
+        <div
+          className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm p-3 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="내 식당 웹사이트 미리보기"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <div
+            className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-3 py-2 sm:px-5 sm:py-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Live Preview</p>
+                <h3 className="mt-1 text-sm font-semibold sm:text-base">내 식당 웹사이트</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                aria-label="미리보기 닫기"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 bg-muted/30">
+              <iframe
+                src={featuredWork?.previewUrl ?? RESTAURANT_PREVIEW_URL}
+                title="내 식당 웹사이트"
+                loading="eager"
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="h-full w-full border-0 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,33 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
+const PREVIEW_URL = "https://perthwithcoffee.lovable.app/";
+
 export const Route = createFileRoute("/restaurant-project")({
   component: RestaurantProjectPage,
 });
 
 function RestaurantProjectPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="size-4" /> 메인으로
-        </Link>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.07),_transparent_55%)] text-foreground">
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mb-4 flex items-center justify-between rounded-full border border-border bg-background/85 px-4 py-3 shadow-sm backdrop-blur">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="size-4" /> 메인으로
+          </Link>
+          <div className="text-sm font-medium text-foreground">미리보기 · 내 식당 웹사이트</div>
+        </div>
 
-        <div className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm">
-          <div className="border-b border-border px-6 py-6 sm:px-8">
-            <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground">Restaurant Project</p>
-            <h1 className="mt-3 font-serif text-3xl sm:text-4xl tracking-tight">내 식당 웹사이트</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Lovable로 만든 식당 프로젝트를 내부 페이지에서 바로 확인할 수 있도록 연결했습니다.
-            </p>
+        <div className="flex-1 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+          <div className="border-b border-border/80 bg-[#f7f4ee] px-4 py-3 sm:px-5">
+            <div className="flex items-center gap-2">
+              <span className="size-3 rounded-full bg-red-400" />
+              <span className="size-3 rounded-full bg-amber-400" />
+              <span className="size-3 rounded-full bg-emerald-400" />
+            </div>
+            <div className="mt-3 flex items-center rounded-full border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+              <span className="mr-2 text-[10px] uppercase tracking-[0.3em] text-foreground/70">Preview</span>
+              <span className="truncate">{PREVIEW_URL}</span>
+            </div>
           </div>
 
-          <div className="h-[70vh] min-h-[640px] w-full bg-muted/40">
+          <div className="h-[calc(100vh-180px)] min-h-[640px] w-full bg-muted/30">
             <iframe
-              src="https://perthwithcoffee.lovable.app/"
+              src={PREVIEW_URL}
               title="내 식당 웹사이트 미리보기"
-              loading="lazy"
-              className="h-full w-full border-0"
+              loading="eager"
+              referrerPolicy="strict-origin-when-cross-origin"
+              className="h-full w-full border-0 bg-white"
             />
           </div>
         </div>

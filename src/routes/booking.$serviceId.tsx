@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link, notFound } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { Slider } from "@/components/ui/slider";
@@ -36,8 +36,6 @@ function Booking() {
   const { service } = Route.useLoaderData() as { service: Service };
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const isProjectView =
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "project";
   const [selected, setSelected] = useState<SelectedOptions>(() => defaultSelection(service));
   const [deadline, setDeadline] = useState<Date | undefined>();
   const [name, setName] = useState("");
@@ -56,6 +54,14 @@ function Booking() {
     return false;
   };
 
+  const shouldRedirectToProjectPreview = service.id === "restaurant";
+
+  useEffect(() => {
+    if (shouldRedirectToProjectPreview) {
+      window.location.hash = "/restaurant-project";
+    }
+  }, [shouldRedirectToProjectPreview]);
+
   const handleNext = () => {
     if (step < 2) {
       setStep(step + 1);
@@ -71,25 +77,8 @@ function Booking() {
     }
   };
 
-  if (isProjectView && service.id === "restaurant") {
-    return (
-      <div className="min-h-screen bg-background">
-        <Nav />
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="size-4" /> 메인으로
-          </Link>
-
-          <div className="rounded-[2rem] border border-border bg-card p-2 shadow-sm">
-            <iframe
-              src="https://perthwithcoffee.lovable.app/" // TODO: replace with your real restaurant Lovable URL later
-              title="내 식당 웹사이트"
-              className="w-full h-[calc(100vh-7rem)] min-h-[70vh] rounded-[1.5rem] border-0"
-            />
-          </div>
-        </div>
-      </div>
-    );
+  if (shouldRedirectToProjectPreview) {
+    return null;
   }
 
   return (
