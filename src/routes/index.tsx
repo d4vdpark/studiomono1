@@ -311,14 +311,7 @@ function ContactSection() {
   const [data, setData] = useState({ name: "", phone: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const handleFieldChange = useCallback(
-    (field: "name" | "phone" | "email" | "message") => (value: string) => {
-      setData((current) => ({ ...current, [field]: value }));
-    },
-    [],
-  );
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!data.name || !data.phone) {
       toast.error("이름과 전화번호를 입력해주세요.");
@@ -327,7 +320,7 @@ function ContactSection() {
     setSent(true);
     toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
     setData({ name: "", phone: "", email: "", message: "" });
-  }, [data.name, data.phone]);
+  };
 
   return (
     <section id="contact" className="bg-foreground text-background py-20 sm:py-32 mt-10">
@@ -344,40 +337,48 @@ function ContactSection() {
 
         <Reveal delay={120}>
           <form onSubmit={handleSubmit} className="mt-12 sm:mt-16 space-y-7">
-            <Field
-              label="이름"
-              value={data.name}
-              onChange={handleFieldChange("name")}
-              placeholder="홍길동"
-              autoComplete="name"
-            />
-            <Field
-              label="전화번호"
-              value={data.phone}
-              onChange={handleFieldChange("phone")}
-              placeholder="010 0000 0000"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel"
-            />
-            <Field
-              label="이메일"
-              value={data.email}
-              onChange={handleFieldChange("email")}
-              placeholder="you@example.com"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-            />
+            <div>
+              <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">이름</label>
+              <input
+                type="text"
+                value={data.name}
+                onChange={(e) => setData({ ...data, name: e.target.value })}
+                placeholder="홍길동"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">전화번호</label>
+              <input
+                type="tel"
+                value={data.phone}
+                onChange={(e) => setData({ ...data, phone: e.target.value })}
+                placeholder="010 0000 0000"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">이메일</label>
+              <input
+                type="email"
+                value={data.email}
+                onChange={(e) => setData({ ...data, email: e.target.value })}
+                placeholder="you@example.com"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+              />
+            </div>
+
             <div>
               <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">
                 간단한 소개 (선택)
               </label>
-              <Textarea
+              <textarea
                 value={data.message}
-                onChange={(event) => handleFieldChange("message")(event.target.value)}
+                onChange={(e) => setData({ ...data, message: e.target.value })}
                 placeholder="어떤 가게인가요? 어떤 기능이 필요하신가요?"
-                className="min-h-32 bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg placeholder:text-background/30 focus-visible:border-accent focus-visible:ring-0 resize-none"
+                className="w-full min-h-32 bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg text-background placeholder:text-background/30 focus:outline-none focus:border-accent resize-none"
               />
             </div>
 
@@ -392,38 +393,5 @@ function ContactSection() {
         </Reveal>
       </div>
     </section>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  inputMode,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  type?: string;
-  inputMode?: "numeric" | "email" | "text" | "tel";
-  autoComplete?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">{label}</label>
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        type={type}
-        inputMode={inputMode}
-        autoComplete={autoComplete}
-        className="bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 placeholder:text-background/30 focus-visible:border-accent focus-visible:ring-0"
-      />
-    </div>
   );
 }
