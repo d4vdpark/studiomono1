@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import { Nav, MobileBottomBar } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
@@ -330,15 +330,6 @@ function Home() {
 function ContactSection() {
   const [data, setData] = useState({ name: "", phone: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
-  const resetTimerRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (resetTimerRef.current !== null) {
-        window.clearTimeout(resetTimerRef.current);
-      }
-    };
-  }, []);
 
   const handleFieldChange = useCallback(
     (field: "name" | "phone" | "email" | "message") => (value: string) => {
@@ -353,18 +344,9 @@ function ContactSection() {
       toast.error("이름과 전화번호를 입력해주세요.");
       return;
     }
-
-    if (resetTimerRef.current !== null) {
-      window.clearTimeout(resetTimerRef.current);
-    }
-
     setSent(true);
     toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
-    resetTimerRef.current = window.setTimeout(() => {
-      setData({ name: "", phone: "", email: "", message: "" });
-      setSent(false);
-      resetTimerRef.current = null;
-    }, 2500);
+    setData({ name: "", phone: "", email: "", message: "" });
   }, [data.name, data.phone]);
 
   return (

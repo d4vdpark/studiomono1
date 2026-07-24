@@ -1,11 +1,8 @@
 import { createFileRoute, useNavigate, Link, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/Nav";
-import { Slider } from "@/components/ui/slider";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import {
   getService,
   calculatePrice,
@@ -14,8 +11,7 @@ import {
   type SelectedOptions,
 } from "@/lib/services";
 import { formatKRW } from "@/lib/orders";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/booking/$serviceId")({
   loader: ({ params }) => {
@@ -37,54 +33,24 @@ function Booking() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<SelectedOptions>(() => defaultSelection(service));
-  const [deadline, setDeadline] = useState<Date | undefined>();
+  const [deadline, setDeadline] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const price = useMemo(() => calculatePrice(service, selected), [service, selected]);
-  const today = useMemo(() => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    return date;
-  }, []);
-  const weekendModifier = useCallback((date: Date) => date.getDay() === 0 || date.getDay() === 6, []);
-  const disablePastDates = useCallback((date: Date) => date < today, [today]);
+  const price = calculatePrice(service, selected);
+  const today = new Date().toISOString().split("T")[0];
 
   const STEPS = ["옵션 선택", "마감일", "정보 입력"];
 
   const canProceed = () => {
     if (step === 0) return true;
-    if (step === 1) return !!deadline;
+    if (step === 1) return deadline.trim().length > 0;
     if (step === 2) return name.trim() && email.trim();
     return false;
   };
 
   const shouldRedirectToProjectPreview = service.id === "restaurant";
-
-  useEffect(() => {
-    if (shouldRedirectToProjectPreview) {
-      navigate({ to: "/restaurant-project", replace: true });
-    }
-  }, [navigate, shouldRedirectToProjectPreview]);
-
-  const handleSliderChange = useCallback((optionId: string, nextValue: number) => {
-    setSelected((current) => ({ ...current, [optionId]: nextValue }));
-  }, []);
-
-  const handleSelectChange = useCallback((optionId: string, nextValue: string) => {
-    setSelected((current) => ({ ...current, [optionId]: nextValue }));
-  }, []);
-
-  const handleCheckboxToggle = useCallback((optionId: string, optionValue: string, checked: boolean) => {
-    setSelected((current) => {
-      const currentValues = ((current[optionId] as string[]) || []);
-      const nextValues = checked
-        ? currentValues.filter((value) => value !== optionValue)
-        : [...currentValues, optionValue];
-
-      return { ...current, [optionId]: nextValues };
-    });
-  }, []);
+  const restaurantPreviewUrl = "https://perthwithcoffee.lovable.app/";
 
   const handleNext = () => {
     if (step < 2) {
@@ -93,7 +59,7 @@ function Booking() {
       const params = new URLSearchParams({
         s: service.id,
         sel: JSON.stringify(selected),
-        d: deadline!.toISOString(),
+        d: deadline,
         n: name,
         e: email,
       });
@@ -102,8 +68,64 @@ function Booking() {
   };
 
   if (shouldRedirectToProjectPreview) {
-    return null;
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.07),_transparent_55%)] text-foreground">
+        <Nav />
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mb-4 flex items-center justify-between rounded-full border border-border bg-background/85 px-4 py-3 shadow-sm backdrop-blur">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="size-4" /> 메인으로
+            </Link>
+            <div className="text-sm font-medium text-foreground">미리보기 · 내 식당 웹사이트</div>
+          </div>
+
+          <div className="flex-1 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+            <div className="border-b border-border/80 bg-[#f7f4ee] px-4 py-3 sm:px-5">
+              <div className="flex items-center gap-2">
+                <span className="size-3 rounded-full bg-red-400" />
+                <span className="size-3 rounded-full bg-amber-400" />
+                <span className="size-3 rounded-full bg-emerald-400" />
+              </div>
+              <div className="mt-3 flex items-center rounded-full border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+                <span className="mr-2 text-[10px] uppercase tracking-[0.3em] text-foreground/70">Preview</span>
+                <span className="truncate">{restaurantPreviewUrl}</span>
+              </div>
+            </div>
+
+            <div className="h-[calc(100vh-180px)] min-h-[640px] w-full bg-muted/30">
+              <iframe
+                src={restaurantPreviewUrl}
+                title="내 식당 웹사이트 미리보기"
+                loading="eager"
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="h-full w-full border-0 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
+
+  const updateSliderSelection = (optionId: string, value: string) => {
+    const parsed = Number(value);
+    setSelected((current) => ({ ...current, [optionId]: Number.isNaN(parsed) ? 0 : parsed }));
+  };
+
+  const updateSelectSelection = (optionId: string, value: string) => {
+    setSelected((current) => ({ ...current, [optionId]: value }));
+  };
+
+  const toggleCheckboxSelection = (optionId: string, optionValue: string, checked: boolean) => {
+    setSelected((current) => {
+      const currentValues = ((current[optionId] as string[]) || []);
+      const nextValues = checked
+        ? [...currentValues, optionValue]
+        : currentValues.filter((value) => value !== optionValue);
+
+      return { ...current, [optionId]: nextValues };
+    });
+  };
 
   return (
     <div className="min-h-screen">
@@ -156,12 +178,14 @@ function Booking() {
                             </span>
                             <span className="text-sm text-muted-foreground">+{formatKRW((selected[opt.id] as number) * (opt.basePrice || 0))}</span>
                           </div>
-                          <Slider
+                          <input
+                            type="range"
                             min={opt.min}
                             max={opt.max}
                             step={opt.step}
-                            value={[selected[opt.id] as number]}
-                            onValueChange={(value) => handleSliderChange(opt.id, value[0])}
+                            value={selected[opt.id] as number}
+                            onChange={(event) => updateSliderSelection(opt.id, event.target.value)}
+                            className="h-2 w-full cursor-pointer accent-foreground"
                           />
                         </div>
                       )}
@@ -171,7 +195,7 @@ function Booking() {
                             <button
                               type="button"
                               key={o.value}
-                              onClick={() => handleSelectChange(opt.id, o.value)}
+                              onClick={() => updateSelectSelection(opt.id, o.value)}
                               className={cn(
                                 "rounded-2xl border-2 p-4 text-left transition-all",
                                 selected[opt.id] === o.value
@@ -197,7 +221,7 @@ function Booking() {
                                 type="button"
                                 key={o.value}
                                 onClick={() => {
-                                  handleCheckboxToggle(opt.id, o.value, checked);
+                                  toggleCheckboxSelection(opt.id, o.value, !checked);
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between rounded-2xl border-2 p-4 text-left transition-all",
@@ -227,22 +251,20 @@ function Booking() {
               {step === 1 && (
                 <div>
                   <h3 className="font-semibold mb-2">희망 마감일을 선택하세요</h3>
-                  <p className="text-sm text-muted-foreground mb-6">오늘 이전 날짜는 선택할 수 없습니다.</p>
-                  <div className="flex justify-center">
-                    <Calendar
-                      mode="single"
-                      selected={deadline}
-                      onSelect={setDeadline}
-                      disabled={disablePastDates}
-                      locale={ko}
-                      modifiers={{ weekend: weekendModifier }}
-                      modifiersClassNames={{ weekend: "text-[var(--color-weekend)] font-semibold" }}
-                      className="pointer-events-auto rounded-2xl border border-border p-4"
+                  <p className="text-sm text-muted-foreground mb-6">달력 위젯 대신 가벼운 날짜 입력 필드를 사용합니다.</p>
+                  <div className="max-w-md mx-auto">
+                    <label className="text-sm font-medium mb-2 block">마감일</label>
+                    <Input
+                      type="date"
+                      min={today}
+                      value={deadline}
+                      onChange={(event) => setDeadline(event.target.value)}
+                      className="h-12 rounded-xl"
                     />
                   </div>
                   {deadline && (
                     <p className="text-center mt-6 text-sm">
-                      선택한 마감일: <span className="font-semibold">{format(deadline, "yyyy년 M월 d일 (EEE)", { locale: ko })}</span>
+                      선택한 마감일: <span className="font-semibold">{deadline}</span>
                     </p>
                   )}
                 </div>
