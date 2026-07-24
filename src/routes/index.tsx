@@ -308,24 +308,28 @@ function Home() {
 }
 
 function ContactSection() {
-  const [data, setData] = useState({ name: "", phone: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!data.name || !data.phone) {
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name");
+    const phone = formData.get("phone");
+
+    if (!name || !phone) {
       toast.error("이름과 전화번호를 입력해주세요.");
       return;
     }
+
     setSent(true);
     toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
-    setData({ name: "", phone: "", email: "", message: "" });
+    e.currentTarget.reset();
   };
 
   return (
     <section id="contact" className="bg-foreground text-background py-20 sm:py-32 mt-10">
       <div className="mx-auto max-w-3xl px-5 sm:px-8">
-        <Reveal>
+        <div>
           <p className="text-xs tracking-[0.3em] uppercase text-background/60 mb-3">04 · Contact</p>
           <h2 className="font-serif text-4xl sm:text-6xl tracking-tight">
             먼저, <span className="italic">이야기</span>부터.
@@ -333,40 +337,37 @@ function ContactSection() {
           <p className="mt-5 text-background/70 max-w-md leading-relaxed">
             영업일 기준 1일 내로 직접 연락드립니다. 무료 상담은 부담 없이.
           </p>
-        </Reveal>
+        </div>
 
-        <Reveal delay={120}>
-          <form onSubmit={handleSubmit} className="mt-12 sm:mt-16 space-y-7">
+        <div className="mt-12 sm:mt-16">
+          <form onSubmit={handleSubmit} className="space-y-7">
             <div>
               <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">이름</label>
               <input
+                name="name"
                 type="text"
-                value={data.name}
-                onChange={(e) => setData({ ...data, name: e.target.value })}
                 placeholder="홍길동"
-                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
 
             <div>
               <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">전화번호</label>
               <input
+                name="phone"
                 type="tel"
-                value={data.phone}
-                onChange={(e) => setData({ ...data, phone: e.target.value })}
                 placeholder="010 0000 0000"
-                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
 
             <div>
               <label className="block text-xs tracking-[0.2em] uppercase text-background/50 mb-3">이메일</label>
               <input
+                name="email"
                 type="email"
-                value={data.email}
-                onChange={(e) => setData({ ...data, email: e.target.value })}
                 placeholder="you@example.com"
-                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
+                className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
 
@@ -375,22 +376,21 @@ function ContactSection() {
                 간단한 소개 (선택)
               </label>
               <textarea
-                value={data.message}
-                onChange={(e) => setData({ ...data, message: e.target.value })}
+                name="message"
                 placeholder="어떤 가게인가요? 어떤 기능이 필요하신가요?"
-                className="w-full min-h-32 bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg text-background placeholder:text-background/30 focus:outline-none focus:border-accent resize-none"
+                className="w-full min-h-32 bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base text-background placeholder:text-background/30 focus:outline-none focus:border-accent resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={sent}
-              className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-background text-foreground px-8 text-base font-medium hover:bg-background/90 transition-colors w-full sm:w-auto disabled:opacity-60"
+              className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-background text-foreground px-8 text-base font-medium hover:bg-background/90 transition-colors w-full sm:w-auto disabled:opacity-60 cursor-pointer"
             >
               {sent ? <><Check className="size-4" /> 접수 완료</> : <>상담 신청하기 <ArrowUpRight className="size-4" /></>}
             </button>
           </form>
-        </Reveal>
+        </div>
       </div>
     </section>
   );
