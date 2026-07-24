@@ -1,8 +1,11 @@
 import { createFileRoute, useNavigate, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { Slider } from "@/components/ui/slider";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   getService,
   calculatePrice,
@@ -11,7 +14,8 @@ import {
   type SelectedOptions,
 } from "@/lib/services";
 import { formatKRW } from "@/lib/orders";
-import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 export const Route = createFileRoute("/booking/$serviceId")({
   loader: ({ params }) => {
@@ -32,25 +36,35 @@ function Booking() {
   const { service } = Route.useLoaderData() as { service: Service };
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const isProjectView = useMemo(() => {
+    if (typeof window === "undefined") return false;
+
+    const hash = window.location.hash.replace(/^#/, "");
+    const [path, queryString = ""] = hash.split("?");
+
+    return path === "/booking/restaurant" && new URLSearchParams(queryString).get("view") === "project";
+  }, []);
   const [selected, setSelected] = useState<SelectedOptions>(() => defaultSelection(service));
-  const [deadline, setDeadline] = useState("");
+  const [deadline, setDeadline] = useState<Date | undefined>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const price = calculatePrice(service, selected);
-  const today = new Date().toISOString().split("T")[0];
+  const price = useMemo(() => calculatePrice(service, selected), [service, selected]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const STEPS = ["옵션 선택", "마감일", "정보 입력"];
 
   const canProceed = () => {
     if (step === 0) return true;
-    if (step === 1) return deadline.trim().length > 0;
+    if (step === 1) return !!deadline;
     if (step === 2) return name.trim() && email.trim();
     return false;
   };
 
-  const shouldRedirectToProjectPreview = service.id === "restaurant";
-  const restaurantPreviewUrl = "https://perthwithcoffee.lovable.app/";
+  const shouldRedirectToProjectPreview = isProjectView && service.id === "restaurant";
+
+ 
 
   const handleNext = () => {
     if (step < 2) {
@@ -59,7 +73,7 @@ function Booking() {
       const params = new URLSearchParams({
         s: service.id,
         sel: JSON.stringify(selected),
-        d: deadline,
+        d: deadline!.toISOString(),
         n: name,
         e: email,
       });
@@ -68,64 +82,8 @@ function Booking() {
   };
 
   if (shouldRedirectToProjectPreview) {
-    return (
-      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.07),_transparent_55%)] text-foreground">
-        <Nav />
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex items-center justify-between rounded-full border border-border bg-background/85 px-4 py-3 shadow-sm backdrop-blur">
-            <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="size-4" /> 메인으로
-            </Link>
-            <div className="text-sm font-medium text-foreground">미리보기 · 내 식당 웹사이트</div>
-          </div>
-
-          <div className="flex-1 overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
-            <div className="border-b border-border/80 bg-[#f7f4ee] px-4 py-3 sm:px-5">
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-red-400" />
-                <span className="size-3 rounded-full bg-amber-400" />
-                <span className="size-3 rounded-full bg-emerald-400" />
-              </div>
-              <div className="mt-3 flex items-center rounded-full border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
-                <span className="mr-2 text-[10px] uppercase tracking-[0.3em] text-foreground/70">Preview</span>
-                <span className="truncate">{restaurantPreviewUrl}</span>
-              </div>
-            </div>
-
-            <div className="h-[calc(100vh-180px)] min-h-[640px] w-full bg-muted/30">
-              <iframe
-                src={restaurantPreviewUrl}
-                title="내 식당 웹사이트 미리보기"
-                loading="eager"
-                referrerPolicy="strict-origin-when-cross-origin"
-                className="h-full w-full border-0 bg-white"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
-
-  const updateSliderSelection = (optionId: string, value: string) => {
-    const parsed = Number(value);
-    setSelected((current) => ({ ...current, [optionId]: Number.isNaN(parsed) ? 0 : parsed }));
-  };
-
-  const updateSelectSelection = (optionId: string, value: string) => {
-    setSelected((current) => ({ ...current, [optionId]: value }));
-  };
-
-  const toggleCheckboxSelection = (optionId: string, optionValue: string, checked: boolean) => {
-    setSelected((current) => {
-      const currentValues = ((current[optionId] as string[]) || []);
-      const nextValues = checked
-        ? [...currentValues, optionValue]
-        : currentValues.filter((value) => value !== optionValue);
-
-      return { ...current, [optionId]: nextValues };
-    });
-  };
 
   return (
     <div className="min-h-screen">
@@ -178,14 +136,12 @@ function Booking() {
                             </span>
                             <span className="text-sm text-muted-foreground">+{formatKRW((selected[opt.id] as number) * (opt.basePrice || 0))}</span>
                           </div>
-                          <input
-                            type="range"
+                          <Slider
                             min={opt.min}
                             max={opt.max}
                             step={opt.step}
-                            value={selected[opt.id] as number}
-                            onChange={(event) => updateSliderSelection(opt.id, event.target.value)}
-                            className="h-2 w-full cursor-pointer accent-foreground"
+                            value={[selected[opt.id] as number]}
+                            onValueChange={(v) => setSelected({ ...selected, [opt.id]: v[0] })}
                           />
                         </div>
                       )}
@@ -193,9 +149,8 @@ function Booking() {
                         <div className="grid sm:grid-cols-3 gap-3">
                           {opt.options!.map((o) => (
                             <button
-                              type="button"
                               key={o.value}
-                              onClick={() => updateSelectSelection(opt.id, o.value)}
+                              onClick={() => setSelected({ ...selected, [opt.id]: o.value })}
                               className={cn(
                                 "rounded-2xl border-2 p-4 text-left transition-all",
                                 selected[opt.id] === o.value
@@ -218,10 +173,10 @@ function Booking() {
                             const checked = arr.includes(o.value);
                             return (
                               <button
-                                type="button"
                                 key={o.value}
                                 onClick={() => {
-                                  toggleCheckboxSelection(opt.id, o.value, !checked);
+                                  const next = checked ? arr.filter((x) => x !== o.value) : [...arr, o.value];
+                                  setSelected({ ...selected, [opt.id]: next });
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between rounded-2xl border-2 p-4 text-left transition-all",
@@ -251,20 +206,22 @@ function Booking() {
               {step === 1 && (
                 <div>
                   <h3 className="font-semibold mb-2">희망 마감일을 선택하세요</h3>
-                  <p className="text-sm text-muted-foreground mb-6">달력 위젯 대신 가벼운 날짜 입력 필드를 사용합니다.</p>
-                  <div className="max-w-md mx-auto">
-                    <label className="text-sm font-medium mb-2 block">마감일</label>
-                    <Input
-                      type="date"
-                      min={today}
-                      value={deadline}
-                      onChange={(event) => setDeadline(event.target.value)}
-                      className="h-12 rounded-xl"
+                  <p className="text-sm text-muted-foreground mb-6">오늘 이전 날짜는 선택할 수 없습니다.</p>
+                  <div className="flex justify-center">
+                    <Calendar
+                      mode="single"
+                      selected={deadline}
+                      onSelect={setDeadline}
+                      disabled={(d) => d < today}
+                      locale={ko}
+                      modifiers={{ weekend: (d) => d.getDay() === 0 || d.getDay() === 6 }}
+                      modifiersClassNames={{ weekend: "text-[var(--color-weekend)] font-semibold" }}
+                      className="pointer-events-auto rounded-2xl border border-border p-4"
                     />
                   </div>
                   {deadline && (
                     <p className="text-center mt-6 text-sm">
-                      선택한 마감일: <span className="font-semibold">{deadline}</span>
+                      선택한 마감일: <span className="font-semibold">{format(deadline, "yyyy년 M월 d일 (EEE)", { locale: ko })}</span>
                     </p>
                   )}
                 </div>
@@ -287,7 +244,6 @@ function Booking() {
 
             <div className="flex justify-between mt-6">
               <button
-                type="button"
                 onClick={() => setStep(Math.max(0, step - 1))}
                 disabled={step === 0}
                 className="inline-flex h-12 items-center rounded-full border border-border px-6 text-sm font-semibold disabled:opacity-40 hover:bg-accent transition-colors"
@@ -295,7 +251,6 @@ function Booking() {
                 이전
               </button>
               <button
-                type="button"
                 onClick={handleNext}
                 disabled={!canProceed()}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-foreground text-background px-7 text-sm font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity"
