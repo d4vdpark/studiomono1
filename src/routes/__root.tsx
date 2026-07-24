@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -6,7 +6,6 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 const appCssUrl = `${appCss}?v=20260724-restaurant-project`;
@@ -106,13 +105,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
-
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+    <>
       <Outlet />
-      <Toaster position="top-center" richColors />
-    </QueryClientProvider>
+    </>
   );
 }

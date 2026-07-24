@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import { Nav, MobileBottomBar } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
@@ -330,20 +330,42 @@ function Home() {
 function ContactSection() {
   const [data, setData] = useState({ name: "", phone: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
+  const resetTimerRef = useRef<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleFieldChange = useCallback(
+    (field: "name" | "phone" | "email" | "message") => (value: string) => {
+      setData((current) => ({ ...current, [field]: value }));
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!data.name || !data.phone) {
       toast.error("이름과 전화번호를 입력해주세요.");
       return;
     }
+
+    if (resetTimerRef.current !== null) {
+      window.clearTimeout(resetTimerRef.current);
+    }
+
     setSent(true);
     toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
-    setTimeout(() => {
+    resetTimerRef.current = window.setTimeout(() => {
       setData({ name: "", phone: "", email: "", message: "" });
       setSent(false);
+      resetTimerRef.current = null;
     }, 2500);
-  };
+  }, [data.name, data.phone]);
 
   return (
     <section id="contact" className="bg-foreground text-background py-20 sm:py-32 mt-10">
@@ -363,14 +385,14 @@ function ContactSection() {
             <Field
               label="이름"
               value={data.name}
-              onChange={(v) => setData({ ...data, name: v })}
+              onChange={handleFieldChange("name")}
               placeholder="홍길동"
               autoComplete="name"
             />
             <Field
               label="전화번호"
               value={data.phone}
-              onChange={(v) => setData({ ...data, phone: v })}
+              onChange={handleFieldChange("phone")}
               placeholder="010 0000 0000"
               type="tel"
               inputMode="numeric"
@@ -379,7 +401,7 @@ function ContactSection() {
             <Field
               label="이메일"
               value={data.email}
-              onChange={(v) => setData({ ...data, email: v })}
+              onChange={handleFieldChange("email")}
               placeholder="you@example.com"
               type="email"
               inputMode="email"
@@ -391,7 +413,7 @@ function ContactSection() {
               </label>
               <Textarea
                 value={data.message}
-                onChange={(e) => setData({ ...data, message: e.target.value })}
+                onChange={(event) => handleFieldChange("message")(event.target.value)}
                 placeholder="어떤 가게인가요? 어떤 기능이 필요하신가요?"
                 className="min-h-32 bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-lg placeholder:text-background/30 focus-visible:border-accent focus-visible:ring-0 resize-none"
               />

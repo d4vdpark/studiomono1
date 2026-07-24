@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { Slider } from "@/components/ui/slider";
@@ -42,8 +42,13 @@ function Booking() {
   const [email, setEmail] = useState("");
 
   const price = useMemo(() => calculatePrice(service, selected), [service, selected]);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
+  const weekendModifier = useCallback((date: Date) => date.getDay() === 0 || date.getDay() === 6, []);
+  const disablePastDates = useCallback((date: Date) => date < today, [today]);
 
   const STEPS = ["옵션 선택", "마감일", "정보 입력"];
 
@@ -58,9 +63,28 @@ function Booking() {
 
   useEffect(() => {
     if (shouldRedirectToProjectPreview) {
-      window.location.hash = "/restaurant-project";
+      navigate({ to: "/restaurant-project", replace: true });
     }
-  }, [shouldRedirectToProjectPreview]);
+  }, [navigate, shouldRedirectToProjectPreview]);
+
+  const handleSliderChange = useCallback((optionId: string, nextValue: number) => {
+    setSelected((current) => ({ ...current, [optionId]: nextValue }));
+  }, []);
+
+  const handleSelectChange = useCallback((optionId: string, nextValue: string) => {
+    setSelected((current) => ({ ...current, [optionId]: nextValue }));
+  }, []);
+
+  const handleCheckboxToggle = useCallback((optionId: string, optionValue: string, checked: boolean) => {
+    setSelected((current) => {
+      const currentValues = ((current[optionId] as string[]) || []);
+      const nextValues = checked
+        ? currentValues.filter((value) => value !== optionValue)
+        : [...currentValues, optionValue];
+
+      return { ...current, [optionId]: nextValues };
+    });
+  }, []);
 
   const handleNext = () => {
     if (step < 2) {
@@ -137,7 +161,7 @@ function Booking() {
                             max={opt.max}
                             step={opt.step}
                             value={[selected[opt.id] as number]}
-                            onValueChange={(v) => setSelected({ ...selected, [opt.id]: v[0] })}
+                            onValueChange={(value) => handleSliderChange(opt.id, value[0])}
                           />
                         </div>
                       )}
@@ -145,8 +169,9 @@ function Booking() {
                         <div className="grid sm:grid-cols-3 gap-3">
                           {opt.options!.map((o) => (
                             <button
+                              type="button"
                               key={o.value}
-                              onClick={() => setSelected({ ...selected, [opt.id]: o.value })}
+                              onClick={() => handleSelectChange(opt.id, o.value)}
                               className={cn(
                                 "rounded-2xl border-2 p-4 text-left transition-all",
                                 selected[opt.id] === o.value
@@ -169,10 +194,10 @@ function Booking() {
                             const checked = arr.includes(o.value);
                             return (
                               <button
+                                type="button"
                                 key={o.value}
                                 onClick={() => {
-                                  const next = checked ? arr.filter((x) => x !== o.value) : [...arr, o.value];
-                                  setSelected({ ...selected, [opt.id]: next });
+                                  handleCheckboxToggle(opt.id, o.value, checked);
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between rounded-2xl border-2 p-4 text-left transition-all",
@@ -208,9 +233,9 @@ function Booking() {
                       mode="single"
                       selected={deadline}
                       onSelect={setDeadline}
-                      disabled={(d) => d < today}
+                      disabled={disablePastDates}
                       locale={ko}
-                      modifiers={{ weekend: (d) => d.getDay() === 0 || d.getDay() === 6 }}
+                      modifiers={{ weekend: weekendModifier }}
                       modifiersClassNames={{ weekend: "text-[var(--color-weekend)] font-semibold" }}
                       className="pointer-events-auto rounded-2xl border border-border p-4"
                     />
@@ -240,6 +265,7 @@ function Booking() {
 
             <div className="flex justify-between mt-6">
               <button
+                type="button"
                 onClick={() => setStep(Math.max(0, step - 1))}
                 disabled={step === 0}
                 className="inline-flex h-12 items-center rounded-full border border-border px-6 text-sm font-semibold disabled:opacity-40 hover:bg-accent transition-colors"
@@ -247,6 +273,7 @@ function Booking() {
                 이전
               </button>
               <button
+                type="button"
                 onClick={handleNext}
                 disabled={!canProceed()}
                 className="inline-flex h-12 items-center gap-2 rounded-full bg-foreground text-background px-7 text-sm font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity"
