@@ -193,26 +193,16 @@ function Home() {
                       className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
                       style={{ background: w.tone }}
                     >
+                      {w.previewUrl ? (
+                        <iframe
+                          src={w.previewUrl}
+                          title={w.title}
+                          loading="lazy"
+                          scrolling="no"
+                          className="absolute inset-0 h-full w-full border-0 z-0 pointer-events-none overflow-hidden"
+                        />
+                      ) : null}
                       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-black/70" />
-                      <div className="absolute inset-0 z-[0] flex items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.28),_transparent_45%)]">
-                        <div className="w-[82%] rounded-[2rem] border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
-                          <div className="rounded-[1.5rem] border border-white/20 bg-background/90 p-4 text-left shadow-2xl">
-                            <div className="flex items-center gap-2">
-                              <span className="size-2.5 rounded-full bg-foreground/70" />
-                              <span className="size-2.5 rounded-full bg-foreground/40" />
-                              <span className="size-2.5 rounded-full bg-foreground/20" />
-                            </div>
-                            <div className="mt-4 space-y-3">
-                              <div className="h-3 w-3/4 rounded-full bg-foreground/70" />
-                              <div className="h-3 w-1/2 rounded-full bg-foreground/40" />
-                              <div className="grid grid-cols-2 gap-3 pt-3">
-                                <div className="h-20 rounded-2xl bg-foreground/[0.06]" />
-                                <div className="h-20 rounded-2xl bg-foreground/[0.06]" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                       <div className="absolute top-5 right-5 z-10 text-[10px] tracking-[0.2em] uppercase text-white/80">
                         {w.year}
                       </div>
