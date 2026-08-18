@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import Nav from "@/components/Nav";
+import { Nav } from "@/components/Nav";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/booking/$serviceId")({

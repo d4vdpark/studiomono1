@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { ArrowUpRight, Check, X } from "lucide-react";
 import { Nav, MobileBottomBar } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
@@ -36,37 +36,39 @@ const WORK: Array<{
   previewUrl?: string;
 }> = [
   {
-    title: "내 식당 웹사이트",
+    title: "Brunch Cafe",
     tag: "임시 식당 소개 · 메뉴 · 예약",
     year: "2025",
     tone: "oklch(0.58 0.08 260)",
     previewUrl: "https://perthwithcoffee.lovable.app/",
   },
-  { title: "안온 다이닝", tag: "한남 · 와인 다이닝", year: "2025", tone: "oklch(0.62 0.14 38)" },
-  { title: "Salon Marée", tag: "성수 · 헤어살롱", year: "2025", tone: "oklch(0.42 0.06 240)" },
-  { title: "고요 부동산", tag: "이태원 · 부동산", year: "2024", tone: "oklch(0.36 0.05 150)" },
-  { title: "온스 베이커리", tag: "연남 · 카페", year: "2024", tone: "oklch(0.5 0.12 60)" },
+  {
+    title: "방역 웹사이트",
+    tag: "방역 웹사이트 · 예약 · QR 체크인",
+    year: "2025",
+    tone: "oklch(0.62 0.14 38)",
+    previewUrl: "https://ourenvironment.lovable.app/",
+  },
 ];
 
 const RESTAURANT_PREVIEW_URL = "https://perthwithcoffee.lovable.app";
 
 function Home() {
-  const featuredWork = useMemo(() => WORK.find((item) => item.title === "내 식당 웹사이트"), []);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewWork, setPreviewWork] = useState<(typeof WORK)[number] | null>(null);
 
-  const handleRestaurantPreviewClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const handleWorkPreviewClick = (event: MouseEvent<HTMLAnchorElement>, work: (typeof WORK)[number]) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsPreviewOpen(true);
+    setPreviewWork(work);
   };
 
   useEffect(() => {
-    if (!isPreviewOpen) return;
+    if (!previewWork) return;
 
     const originalOverflow = document.body.style.overflow;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsPreviewOpen(false);
+        setPreviewWork(null);
       }
     };
 
@@ -77,7 +79,7 @@ function Home() {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [isPreviewOpen]);
+  }, [previewWork]);
 
   return (
     <div className="min-h-screen grain pb-24 md:pb-0">
@@ -111,7 +113,7 @@ function Home() {
             </Link>
             <Link
               to="/"
-              hash="services"
+              hash="work"
               className="inline-flex h-14 items-center justify-center rounded-full border border-foreground/15 px-7 text-base font-medium hover:bg-foreground/[0.04] transition-colors"
             >
               작업 둘러보기
@@ -142,11 +144,7 @@ function Home() {
         <div className="mt-12 sm:mt-20 grid md:grid-cols-3 gap-4 sm:gap-6">
           {SERVICES.map((s, i) => (
             <Reveal key={s.id} delay={i * 100}>
-              <Link
-                to="/booking/$serviceId"
-                params={{ serviceId: s.id }}
-                className="card-lift group block rounded-3xl border border-border bg-card p-7 sm:p-8 h-full"
-              >
+              <div className="card-lift group block rounded-3xl border border-border bg-card p-7 sm:p-8 h-full pointer-events-none select-none">
                 <div className="flex items-start justify-between mb-8 sm:mb-10">
                   <span className="text-xs tracking-[0.2em] uppercase text-muted-foreground">
                     0{i + 1}
@@ -160,11 +158,28 @@ function Home() {
                 <p className="text-sm text-muted-foreground leading-relaxed mb-8 min-h-[3rem]">
                   {s.description}
                 </p>
-                <div className="pt-6 border-t border-border flex items-baseline justify-between">
-                  <span className="text-xs text-muted-foreground">{s.basePriceLabel}</span>
-                  <span className="font-serif text-2xl">{formatKRW(s.basePrice)}</span>
+                <div className="pt-6 border-t border-border flex items-end justify-between mt-auto">
+                  {/* '베이직 패키지부터'는 그대로 작게 유지 */}
+                  <span className="text-xs text-muted-foreground">베이직 패키지부터</span>
+                  
+                  <div className="text-right">
+                    {/* 1. 원래 가격: 크기 키우고(text-lg), 진한 취소선 적용(decoration-gray-500) */}
+                    <div className="text-lg text-muted-foreground line-through decoration-gray-500 decoration-1.5 mb-0.5">
+                      500,000원
+                    </div>
+                    
+                    {/* 2. 할인된 가격: 훨씬 크게 키우고(text-2xl), 굵게(font-bold) */}
+                    <div className="text-2xl font-bold text-foreground leading-none">
+                      250,000원
+                    </div>
+                    
+                    {/* 3. 날짜: 크기 살짝 키움(text-xs) */}
+                    <div className="text-xs text-muted-foreground mt-1.5">
+                      8월 31일 까지
+                    </div>
+                  </div>
                 </div>
-              </Link>
+              </div>
             </Reveal>
           ))}
         </div>
@@ -183,20 +198,60 @@ function Home() {
           <div className="mt-12 sm:mt-20 grid sm:grid-cols-2 gap-5 sm:gap-8">
             {WORK.map((w, i) => (
               <Reveal key={w.title} delay={i * 100}>
-                {w.title === "내 식당 웹사이트" ? (
+                {w.title === "Brunch Cafe" ? (
                   <a
-                    href={featuredWork?.previewUrl ?? RESTAURANT_PREVIEW_URL}
-                    onClick={handleRestaurantPreviewClick}
+                    href={w.previewUrl ?? RESTAURANT_PREVIEW_URL}
+                    onClick={(event) => handleWorkPreviewClick(event, w)}
+                    className="group block w-full cursor-pointer text-left"
+                  >
+                    <div
+                      className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden"
+                      style={{ background: w.tone }}
+                    >
+                      {w.previewUrl ? (
+                        <iframe
+                          src={w.previewUrl}
+                          title={w.title}
+                          loading="lazy"
+                          scrolling="no"
+                          className="absolute inset-0 h-full w-full border-0 z-0 pointer-events-none overflow-hidden"
+                        />
+                      ) : null}
+                      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/15 via-transparent to-black/70" />
+                      <div className="absolute top-5 right-5 z-10 text-[10px] tracking-[0.2em] uppercase text-white/80">
+                        {w.year}
+                      </div>
+                      <div className="absolute bottom-5 left-5 right-5 z-10 text-white">
+                        <p className="font-serif text-3xl sm:text-4xl">{w.title}</p>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm text-muted-foreground">{w.tag}</p>
+                  </a>
+                ) : w.title === "방역 웹사이트" ? (
+                  <a
+                    href={w.previewUrl}
+                    onClick={(event) => handleWorkPreviewClick(event, w)}
                     className="group block w-full cursor-pointer text-left"
                   >
                     <div
                       className="card-lift relative aspect-[4/5] sm:aspect-[5/6] rounded-3xl overflow-hidden flex flex-col justify-between p-6 sm:p-8"
                       style={{ background: w.tone }}
                     >
-                      <div className="text-[10px] tracking-[0.2em] uppercase text-white/80 text-right">
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <iframe
+                          src={w.previewUrl}
+                          title="방역 웹사이트 카드 미리보기"
+                          loading="lazy"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          className="absolute left-0 top-0 h-[160%] w-[160%] origin-top-left scale-[0.625] border-0 bg-white"
+                        />
+                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.06)_0%,rgba(15,23,42,0.2)_45%,rgba(15,23,42,0.74)_100%)]" />
+                      </div>
+
+                      <div className="relative z-10 text-[10px] tracking-[0.2em] uppercase text-white/80 text-right">
                         {w.year}
                       </div>
-                      <div className="text-white">
+                      <div className="relative z-10 text-white">
                         <p className="font-serif text-3xl sm:text-4xl">{w.title}</p>
                       </div>
                     </div>
@@ -229,11 +284,12 @@ function Home() {
         <Reveal>
           <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-3">03 · Studio</p>
         </Reveal>
-        <Reveal delay={100}>
-          <p className="font-serif text-3xl sm:text-5xl leading-[1.25] max-w-4xl">
-            템플릿이 만든 사이트는 멀리서도 티가 납니다. 우리는 가게 안에 직접 앉아
-            메뉴를 먹고, 손님의 동선을 보고, 사장님의 말투를 듣고 — 그 결을 그대로
-            <span className="italic"> 화면에 옮깁니다.</span>
+       <Reveal delay={100}>
+          <p className="font-serif text-2xl sm:text-4xl leading-relaxed max-w-4xl">
+            사장님의 니즈를 100% 반영하고 그 결을<br />
+            보기 좋게 화면에 옮깁니다. 제작 후 수정부터<br />
+            운영, 업데이트까지 전부 관리합니다.
+            <span className="italic"> </span>
           </p>
         </Reveal>
 
@@ -264,13 +320,13 @@ function Home() {
 
       <MobileBottomBar />
 
-      {isPreviewOpen ? (
+      {previewWork ? (
         <div
           className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm p-3 sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label="내 식당 웹사이트 미리보기"
-          onClick={() => setIsPreviewOpen(false)}
+          aria-label={`${previewWork.title} 미리보기`}
+          onClick={() => setPreviewWork(null)}
         >
           <div
             className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
@@ -279,11 +335,11 @@ function Home() {
             <div className="flex items-center justify-between border-b border-border px-3 py-2 sm:px-5 sm:py-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Live Preview</p>
-                <h3 className="mt-1 text-sm font-semibold sm:text-base">내 식당 웹사이트</h3>
+                <h3 className="mt-1 text-sm font-semibold sm:text-base">{previewWork.title}</h3>
               </div>
               <button
                 type="button"
-                onClick={() => setIsPreviewOpen(false)}
+                onClick={() => setPreviewWork(null)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 aria-label="미리보기 닫기"
               >
@@ -293,8 +349,8 @@ function Home() {
 
             <div className="flex-1 bg-muted/30">
               <iframe
-                src={featuredWork?.previewUrl ?? RESTAURANT_PREVIEW_URL}
-                title="내 식당 웹사이트"
+                src={previewWork.previewUrl ?? RESTAURANT_PREVIEW_URL}
+                title={previewWork.title}
                 loading="eager"
                 referrerPolicy="strict-origin-when-cross-origin"
                 className="h-full w-full border-0 bg-white"
@@ -307,12 +363,13 @@ function Home() {
   );
 }
 
-function ContactSection() {
+export function ContactSection() {
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const name = formData.get("name");
     const phone = formData.get("phone");
 
@@ -321,9 +378,25 @@ function ContactSection() {
       return;
     }
 
-    setSent(true);
-    toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
-    e.currentTarget.reset();
+    try {
+      const response = await fetch("https://formspree.io/f/mvkprdgj", {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setSent(true);
+        toast.success("상담 신청이 접수됐어요. 영업일 기준 1일 내 연락드릴게요.");
+        form.reset();
+      } else {
+        toast.error("전송에 실패했습니다. 다시 시도해 주세요.");
+      }
+    } catch (error) {
+      toast.error("네트워크 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -347,6 +420,7 @@ function ContactSection() {
                 name="name"
                 type="text"
                 placeholder="홍길동"
+                required
                 className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
@@ -357,6 +431,7 @@ function ContactSection() {
                 name="phone"
                 type="tel"
                 placeholder="010 0000 0000"
+                required
                 className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
@@ -367,6 +442,7 @@ function ContactSection() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
+                required
                 className="w-full bg-transparent border-0 border-b border-background/20 rounded-none px-0 text-base h-12 text-background placeholder:text-background/30 focus:outline-none focus:border-accent"
               />
             </div>
@@ -387,7 +463,7 @@ function ContactSection() {
               disabled={sent}
               className="inline-flex h-14 items-center justify-center gap-2 rounded-full bg-background text-foreground px-8 text-base font-medium hover:bg-background/90 transition-colors w-full sm:w-auto disabled:opacity-60 cursor-pointer"
             >
-              {sent ? <><Check className="size-4" /> 접수 완료</> : <>상담 신청하기 <ArrowUpRight className="size-4" /></>}
+              {sent ? "접수 완료" : <>상담 신청하기 <ArrowUpRight className="size-4" /></>}
             </button>
           </form>
         </div>

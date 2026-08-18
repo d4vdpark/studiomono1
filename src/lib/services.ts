@@ -30,7 +30,7 @@ export const SERVICES: readonly Service[] = [
     tagline: "Restaurant & Café",
     description:
       "메뉴판 · 예약 · 위치까지. 손님이 머무는 시간이 길어지는, 브랜드의 결을 담은 사이트.",
-    basePrice: 59000,
+    basePrice: 250000,
     basePriceLabel: "베이직 패키지부터",
     options: [
       {
@@ -74,7 +74,7 @@ export const SERVICES: readonly Service[] = [
     tagline: "Beauty & Salon",
     description:
       "디자이너 · 시술 · 예약을 한 흐름에. 첫 방문을 단골로 만드는 우아한 예약 사이트.",
-    basePrice: 59000,
+    basePrice: 250000,
     basePriceLabel: "베이직 패키지부터",
     options: [
       {
@@ -118,7 +118,7 @@ export const SERVICES: readonly Service[] = [
     tagline: "Local Business",
     description:
       "부동산, 학원, 클리닉, 공방 — 신뢰감 있는 브랜드 사이트와 상담 신청 시스템.",
-    basePrice: 59000,
+    basePrice: 250000,
     basePriceLabel: "베이직 패키지부터",
     options: [
       {
